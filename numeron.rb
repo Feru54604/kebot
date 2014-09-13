@@ -20,6 +20,7 @@ module Numeron
     @@data[username] = Hash.new
     @@data[username]["answer"] = num
     @@data[username]["count"] = 0
+    @@data[username]["time"] = Time.now.to_i
     puts @@data
     $client.update("@#{username} 開始しました",:in_reply_to_status_id => status.id)
   end
@@ -50,8 +51,17 @@ module Numeron
     end
     $client.update("@#{username} #{@@data[username]["count"]}回目:#{eat}EAT-#{bite}BITE",:in_reply_to_status_id => status.id)
     if eat == 4
+      puts "seikai"
       ret = @@data[username]["count"]
+      time = Time.now.to_i - @@data[username]["time"]
+      puts time
       @@data[username] = 0
+      if ret < 25
+        score = 30 - ret
+      else
+        score = 5
+      end
+      $client.update("@#{username} #{ret}回で正解しました！(経過時間:#{time}秒) ポイントを #{score}毛 獲得しました！",:in_reply_to_status_id => status.id)
       return ret
     end
     return 0
