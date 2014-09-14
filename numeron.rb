@@ -4,14 +4,18 @@ module Numeron
     @@data.default = 0
   end
 
-  def generate(status) #4桁の被らない数字を生成
+  def generate(status,n) #4桁の被らない数字を生成
     username = status.user.screen_name
     num = ""
-    4.times do
-      i = rand(0..9).to_s
+    n.times do
+      if n == 4
+        i = rand(0..9).to_s
+      else
+        i = rand(0..15).to_s(16)
+      end
       repeat = 0
       num.each_char do |c|
-        repeat = 1 if c == i
+       repeat = 1 if c == i
       end
       redo if repeat == 1
       num += i
@@ -26,9 +30,9 @@ module Numeron
   end
 
   def judge(status)
-    reply = status.text.gsub(/[^0-9]/,"")
+    reply = status.text.gsub(/@_ke_bot_|\H/,"")
     username = status.user.screen_name
-    puts "judge呼び出し #{@@data[username]}"
+    puts "judge呼び出し #{@@data[username]} #{reply}"
     if @@data[username] == 0 
       puts "強制終了"
       return 0
@@ -50,7 +54,7 @@ module Numeron
       i+=1
     end
     $client.update("@#{username} #{@@data[username]["count"]}回目:#{eat}EAT-#{bite}BITE",:in_reply_to_status_id => status.id)
-    if eat == 4
+    if eat == @@data[username]["answer"].size
       puts "seikai"
       ret = @@data[username]["count"]
       time = Time.now.to_i - @@data[username]["time"]
@@ -66,7 +70,7 @@ module Numeron
     end
     return 0
   end
-
+  
   module_function :initialize
   module_function :generate
   module_function :judge

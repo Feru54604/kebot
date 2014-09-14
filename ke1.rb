@@ -93,16 +93,17 @@ begin
   	end
 
     #ヌメロン判定
-    if contents =~ /@_ke_bot_.*\d{4}/
+    if contents =~ /@_ke_bot_.*\d{4}|@_ke_bot_.*\h{6}/
       puts "数字を検出"
       ke[username] += Numeron.judge(status)
     end
 
     #ヌメロン開始
-    if contents =~ /@_ke_bot_.*あそぼ|ヌメロン/
-      Numeron.generate(status)
+    if contents =~ /ヌメロン.*16/
+      Numeron.generate(status,6)
+    elsif contents =~ /@_ke_bot_.*あそぼ|ヌメロン/
+      Numeron.generate(status,4)
     end
-
   end
   rescue Interrupt, StandardError
   $client.update ("稼働を停止しました#{Time.now}")
