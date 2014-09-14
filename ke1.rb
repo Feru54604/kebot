@@ -75,12 +75,16 @@ begin
   		$client.update("@#{username} おはようの毛",:in_reply_to_status_id => id)
   	end
   
-    if contents == "sonohennniiruガチャ"
+    if contents == "きたく" or conetnts == "ただいま"
+      $client.update("@#{username} おかえりの毛",:in_reply_to_status_id => id)
+    end
+
+    if contents =~ /sonohennniiruガチャ/
   		puts "sonohenn"
   		$client.update_with_media("@#{username} ",File.open("naja.png"),:in_reply_to_status_id => id)
   	end
 
-    if contents == "sonohennniiru10連ガチャ"
+    if contents =~ /sonohennniiru10連ガチャ/
   		10.times do
   			$client.update_with_media("@#{username} ",File.open("naja.png"),:in_reply_to_status_id => id)
   		end
