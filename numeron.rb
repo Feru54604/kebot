@@ -60,13 +60,9 @@ module Numeron
       time = Time.now.to_i - @@data[username]["time"]
       puts time
       @@data[username] = 0
-      if ret < 25
-        score = 30 - ret
-      else
-        score = 5
-      end
+      score = (70*(2.0/5.0)**(ret/5.0)).to_i
       $client.update("@#{username} #{ret}回で正解しました！(経過時間:#{time}秒) ポイントを #{score}毛 獲得しました！",:in_reply_to_status_id => status.id)
-      return ret
+      return score
     end
     return 0
   end
