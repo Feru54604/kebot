@@ -36,9 +36,18 @@ module Poker
     end
   end
   
-  def deal(status)
+  def deal(status,ke)
     puts "yobidasi"
     username = status.user.screen_name
+    bet = status.text.gsub(/\D/,"").to_i
+    if bet < 10
+      $client.update("@#{username} 10毛以上BETしてください",:in_reply_to_status_id => status.id)
+      return 0
+    end
+    if bet > ke
+      $client.update("@#{username} 毛ポイントが足りません",:in_reply_to_status_id => status.id)
+      return 0
+    end
     talon  = @@card.shuffle
     hand = Array.new
     puts talon
@@ -54,10 +63,10 @@ module Poker
     @@data[username] = Hash.new
     @@data[username]["hand"] = hand
     @@data[username]["talon"]= talon
-    @@data[username]["bet"]  = status.text.gsub(/\D/,"")  #賭けポイント
+    @@data[username]["bet"]  = bet  #賭けポイント
     #judge(hand)
     $client.update("@#{username} #{card}",:in_reply_to_status_id => status.id)
-    return @@data[username]["bet"]
+    return bet
   end
  
   def change(status)
@@ -129,24 +138,35 @@ module Poker
     #結果
     if straight == 1 and flash == 1
       win = "ストレートフラッシュ"
+      odds = 100
     elsif straight == 1
       win = "ストレート"
+      odds = 10
     elsif flash == 1
       win = "フラッシュ"
+      odds = 8
     elsif pair == 5
       win = "フォーカード"
+      odds = 7
     elsif pair == 4
       win = "フルハウス"
+      odds = 5
     elsif pair == 3
       win = "スリーカード"
+      odds = 3
     elsif pair == 2
       win = "ツーペア"
+      odds = 2
     elsif pair == 1
       win = "ワンペア"
+      odds = 1
     else
       win = "ブタ"
+      odds = 0
     end
-    $client.update("@#{username} #{@@data[username]["result"]}\n結果：#{win}",:in_reply_to_status_id => status.id)
+    point = @@data[username]["bet"]*odds
+    $client.update("@#{username} #{@@data[username]["result"]}\n結果：#{win}\n#{@@data[username]["bet"]}×#{odds}= #{point}毛 獲得しました！",:in_reply_to_status_id => status.id)
+    return point
   end
   
   module_function :initial
