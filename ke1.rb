@@ -27,7 +27,7 @@ ke.each do |name,count|
   puts "#{name} #{count}"
 end
 
-$client.update("稼働を開始しました#{Time.now}")
+#$client.update("稼働を開始しました#{Time.now}")
 
 begin
   streamclient.userstream do |status|
@@ -119,10 +119,12 @@ begin
       ke[username]-=Poker.deal(status,ke[username])
     end
     if contents =~ /@_ke_bot_.*[0-1]{5}/
+      puts "正規表現抽出"
       Poker.change(status)
+      puts "changeおわり"
       ke[username]+=Poker.judge(status)
     end
   end
   rescue Interrupt, StandardError
-  $client.update ("稼働を停止しました#{Time.now}")
+  #$client.update ("稼働を停止しました#{Time.now}")
 end

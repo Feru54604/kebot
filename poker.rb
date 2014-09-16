@@ -37,12 +37,11 @@ module Poker
   end
   
   def deal(status,ke)
-    puts "yobidasi"
     username = status.user.screen_name
     bet = status.text.gsub(/\D/,"").to_i
     
     #前回プレイ時からの時間
-    if @@data[username].is_a?(Integer)
+    if @@data[username].is_a?(Time)
       return 0 if @@data[username] > Time.now
     end
     
@@ -56,16 +55,13 @@ module Poker
     end
     talon  = @@card.shuffle
     hand = Array.new
-    puts talon
     5.times do
       hand << talon.pop
     end
     card = ""
-    puts hand
     hand.each do |i|
       card+=i.output+" "
     end
-    puts card
     @@data[username] = Hash.new
     @@data[username]["hand"] = hand
     @@data[username]["talon"]= talon
@@ -78,7 +74,6 @@ module Poker
   def change(status)
     username = status.user.screen_name
     order = status.text.gsub(/[^0-1]/,"")
-    puts "order:#{order}"
     i=0
     order.each_char do |c|
       if c == "1"
@@ -170,8 +165,9 @@ module Poker
       win = "ブタ"
       odds = 0
     end
+    puts "判定おわり"
     point = @@data[username]["bet"]*odds
-    limit = Now.time + POKER_LIMIT
+    limit = Time.now + POKER_LIMIT
     $client.update("@#{username} #{@@data[username]["result"]}\n結果：#{win}\n#{@@data[username]["bet"]}×#{odds}= #{point}毛 獲得しました！\n次回は#{limit.to_s[11..18]}よりプレイ可能",:in_reply_to_status_id => status.id)
     @@data[username] = limit
     return point

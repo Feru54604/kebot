@@ -6,10 +6,11 @@ module Numeron
 
   def generate(status,n) #4桁の被らない数字を生成
     username = status.user.screen_name
-    if @@data[username].is_a?(Integer)
-      return if @@data[username] > Time.now
+    if @@data[username].is_a?(Time)
+      return 0 if @@data[username] > Time.now
     end
     num = ""
+    puts "nande"
     n.times do
       if n == 4
         i = rand(0..9).to_s
@@ -36,7 +37,7 @@ module Numeron
     reply = status.text.gsub(/@_ke_bot_|\H/,"")
     username = status.user.screen_name
     puts "judge呼び出し #{@@data[username]} #{reply}"
-    if @@data[username] == 0 
+    if @@data[username].is_a?(Hash) == false 
       puts "強制終了"
       return 0
     end
@@ -58,7 +59,6 @@ module Numeron
     end
     $client.update("@#{username} #{@@data[username]["count"]}回目:#{eat}EAT-#{bite}BITE",:in_reply_to_status_id => status.id)
     if eat == @@data[username]["answer"].size
-      puts "seikai"
       ret = @@data[username]["count"]
       time = Time.now.to_i - @@data[username]["time"]
       puts time
