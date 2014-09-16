@@ -40,6 +40,12 @@ module Poker
     puts "yobidasi"
     username = status.user.screen_name
     bet = status.text.gsub(/\D/,"").to_i
+    
+    #前回プレイ時からの時間
+    if @@data[username].is_a?(Integer)
+      return 0 if @@data[username] > Time.now
+    end
+    
     if bet < 10
       $client.update("@#{username} 10毛以上BETしてください",:in_reply_to_status_id => status.id)
       return 0
@@ -165,7 +171,9 @@ module Poker
       odds = 0
     end
     point = @@data[username]["bet"]*odds
-    $client.update("@#{username} #{@@data[username]["result"]}\n結果：#{win}\n#{@@data[username]["bet"]}×#{odds}= #{point}毛 獲得しました！",:in_reply_to_status_id => status.id)
+    limit = Now.time + POKER_LIMIT
+    $client.update("@#{username} #{@@data[username]["result"]}\n結果：#{win}\n#{@@data[username]["bet"]}×#{odds}= #{point}毛 獲得しました！\n次回は#{limit.to_s[11..18]}よりプレイ可能",:in_reply_to_status_id => status.id)
+    @@data[username] = limit
     return point
   end
   

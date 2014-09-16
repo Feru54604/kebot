@@ -6,6 +6,9 @@ require_relative 'key'
 require_relative 'numeron'
 require_relative 'poker'
 
+NUMERON_LIMIT = 1800
+POKER_LIMIT = 600
+
 streamclient = TweetStream::Client.new
 
 file = open("count.dat","r+")

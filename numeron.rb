@@ -6,6 +6,9 @@ module Numeron
 
   def generate(status,n) #4桁の被らない数字を生成
     username = status.user.screen_name
+    if @@data[username].is_a?(Integer)
+      return if @@data[username] > Time.now
+    end
     num = ""
     n.times do
       if n == 4
@@ -59,9 +62,9 @@ module Numeron
       ret = @@data[username]["count"]
       time = Time.now.to_i - @@data[username]["time"]
       puts time
-      @@data[username] = 0
+      @@data[username] = Time.now + NUMERON_LIMIT
       score = (70*(2.0/5.0)**(ret/5.0)).to_i
-      $client.update("@#{username} #{ret}回で正解しました！(経過時間:#{time}秒) ポイントを #{score}毛 獲得しました！",:in_reply_to_status_id => status.id)
+      $client.update("@#{username} #{ret}回で正解しました！(経過時間:#{time}秒) ポイントを #{score}毛 獲得しました！\n次回は#{@@data[username].to_s[11..18]}よりプレイ可能",:in_reply_to_status_id => status.id)
       return score
     end
     return 0
