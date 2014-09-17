@@ -80,6 +80,7 @@ module Poker
         @@data[username]["hand"][i] = @@data[username]["talon"].pop
       end
       i+=1
+      break if i == 5
     end
     @@data[username]["result"]=""
     @@data[username]["hand"].each do |i|
