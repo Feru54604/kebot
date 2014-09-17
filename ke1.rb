@@ -23,11 +23,17 @@ while line = file.gets
 end
 file.close
 
+i=0
 ke.each do |name,count|
-  puts "#{name} #{count}"
+  a="#{name} #{count}"
+  a+=" "*(30-a.size)
+  print a
+  i+=1
+  puts "" if i%3==0
 end
+puts ""
 
-#$client.update("稼働を開始しました#{Time.now}")
+$client.update("稼働を開始しました#{Time.now}")
 
 begin
   streamclient.userstream do |status|
@@ -38,10 +44,10 @@ begin
     str = username + ":" + contents
     puts str
     
-    if contents =~ /毛ポイント/
+    if contents =~ /毛ポイント/ && username != "_ke_bot_"
       $client.update("@#{username}さんの毛ポイントは #{ke[username]}毛 です。",:in_reply_to_status_id => id)
       
-    elsif contents =~ /毛ランキング|毛ランク/
+    elsif contents =~ /毛ランキング|毛ランク/ && username != "_ke_bot_"
       rank = ke.sort{|(k1, v1), (k2,v2)| v2 <=> v1}
       puts rank
       i = 0
@@ -61,7 +67,7 @@ begin
     elsif contents =~ /毛/ && id != "_ke_bot_"
       begin
         ke[username]+=1
-        $client.update("@#{username} 毛",:in_reply_to_status_id => id)
+        $client.update("@#{username} 毛",:in_reply_to_status_id => id) unless username == "_ke_bot_"
       rescue
         puts "muri"
         $client.update("@#{username} #{er.message}")
@@ -102,7 +108,6 @@ begin
    
     #ヌメロン判定
     if contents =~ /@_ke_bot_.*\d{4}|@_ke_bot_.*\h{6}/
-      puts "数字を検出"
       ke[username] += Numeron.judge(status)
     end
    
@@ -119,12 +124,10 @@ begin
       ke[username]-=Poker.deal(status,ke[username])
     end
     if contents =~ /@_ke_bot_.*[0-1]{5}/
-      puts "正規表現抽出"
       Poker.change(status)
-      puts "changeおわり"
       ke[username]+=Poker.judge(status)
     end
   end
   rescue Interrupt, StandardError
-  #$client.update ("稼働を停止しました#{Time.now}")
+  $client.update ("稼働を停止しました#{Time.now}")
 end

@@ -37,10 +37,14 @@ module Numeron
     reply = status.text.gsub(/@_ke_bot_|\H/,"")
     username = status.user.screen_name
     puts "judge呼び出し #{@@data[username]} #{reply}"
+    
+    #不正な入力
     if @@data[username].is_a?(Hash) == false 
       puts "強制終了"
       return 0
     end
+    return 0 if reply.size != @@data[username]["answer"].size 
+    
     eat = 0
     bite = 0
     i = 0
