@@ -5,6 +5,7 @@ require 'uri'
 require_relative 'key'
 require_relative 'numeron'
 require_relative 'poker'
+require_relative 'feru'
 
 NUMERON_LIMIT = 1800
 POKER_LIMIT = 600
@@ -16,6 +17,7 @@ ke = Hash.new
 ke.default = 0
 eq = Hash.new
 eq.default = [0,0]
+
 while line = file.gets
   linearray = line.split(" ")
   ke[linearray[0]] = linearray[1].to_i
@@ -104,6 +106,15 @@ begin
       fname = "usiusi" + rand(1..10).to_s + ".jpg"
       puts fname
       $client.update_with_media("@#{username} ",File.open(fname),:in_reply_to_status_id => id)
+    end
+    
+    if contents =~ /Feruガチャ/
+      if ke[username]<5
+        $client.update("@#{username} 毛ポイントが足りません",:in_reply_to_status_id => id)
+      else
+        feru(status)
+        ke[username] -= 5
+      end
     end
    
     #ヌメロン判定
