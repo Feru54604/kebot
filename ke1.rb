@@ -122,8 +122,7 @@ begin
     if contents =~ /ポーカー.*\d+/
       puts "ポーカー開始"
       ke[username]-=Poker.deal(status,ke[username])
-    end
-    if contents =~ /@_ke_bot_.*[0-1]{5}/
+    elsif contents =~ /@_ke_bot_.*[0-1]{5}/
       Poker.change(status)
       ke[username]+=Poker.judge(status)
     end
