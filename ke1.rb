@@ -116,7 +116,7 @@ begin
         ke[username] -= 5
       end
     end
-   
+=begin   
     #ヌメロン判定
     if contents =~ /@_ke_bot_.*\d{4}|@_ke_bot_.*\h{6}/
       ke[username] += Numeron.judge(status)
@@ -128,7 +128,7 @@ begin
     elsif contents =~ /@_ke_bot_.*あそぼ|ヌメロン/
       Numeron.generate(status,4)
     end
-    
+=end 
     #ポーカー
     if contents =~ /ポーカー.*\d+/
       puts "ポーカー開始"
