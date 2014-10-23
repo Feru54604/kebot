@@ -3,7 +3,7 @@ class Trump
     @suite = suite
     @num = num
   end
-  
+
   def output
     case @num
     when 14
@@ -19,7 +19,7 @@ class Trump
     end
     return "#{@suite}#{num}"
   end
-  
+
   attr_reader :suite
   attr_reader :num
 end
@@ -35,16 +35,16 @@ module Poker
       end
     end
   end
-  
+
   def deal(status,ke)
     username = status.user.screen_name
     bet = status.text.gsub(/\D/,"").to_i
-    
+
     #前回プレイ時からの時間
     if @@data[username].is_a?(Time)
       return 0 if @@data[username] > Time.now
     end
-    
+
     if bet < 10
       $client.update("@#{username} 10毛以上BETしてください",:in_reply_to_status_id => status.id)
       return 0
@@ -70,7 +70,7 @@ module Poker
     $client.update("@#{username} #{card}",:in_reply_to_status_id => status.id)
     return bet
   end
- 
+
   def change(status)
     username = status.user.screen_name
     order = status.text.gsub(/[^0-1]/,"")
@@ -87,7 +87,7 @@ module Poker
       @@data[username]["result"]+=i.output+" "
     end
   end
-  
+
   def judge(status)
     username = status.user.screen_name
     hand = @@data[username]["hand"]
@@ -99,25 +99,27 @@ module Poker
       suitetime[i.suite]+=1
       numtime[i.num]+=1
     end
-    
+
     #ストレート？
     if numtime.size == 5 #数字が5種類
       numlist = Array.new
       hand.each do |i|
         numlist << i.num
       end
-      if numlist.max - numlist.min == 4
-        if numlist.max == 14
+      # 数字が5種類でmaxが14で総和が28、すなわち2,3,4,5,14
+      # 総和の書き方はググっただけやから一応手元のバージョンでこれができるか調べてから更新してくれ
+      if numlist.max - numlist.min == 4 || (numlist.max == 14 && numlist.inject(:+)28)
+        if numlist.min == 10 # A2345でもmaxが14になるのでminで判定に変更
           straight = 2 #ロイヤルフラグ
         else
           straight = 1
         end
       end
     end
-    
+
     #フラッシュ？
     flash = 1 if suitetime.size == 1 #マークが一種類
-    
+
     #ペア系判定
     min = numtime.min { |a,b| a[1] <=> b[1] }[1] #同じ数字が出た回数の最大最小
     max = numtime.max { |a,b| a[1] <=> b[1] }[1]
@@ -136,23 +138,26 @@ module Poker
       pair = 2 if i == 2  #ツーペア
       pair = 1 if i == 1  #ワンペア
     end
-    
+
     #結果
-    if straight == 1 and flash == 1
+    if straight == 2 and flash == 1
+      win = "ロイヤルストレートフラッシュ"
+      odds = 1000
+    elsif straight > 0 and flash == 1
       win = "ストレートフラッシュ"
       odds = 100
-    elsif straight == 1
+    elsif straight > 0
       win = "ストレート"
-      odds = 10
+      odds = 8
     elsif flash == 1
       win = "フラッシュ"
-      odds = 8
+      odds = 10
     elsif pair == 5
       win = "フォーカード"
-      odds = 7
+      odds = 30
     elsif pair == 4
       win = "フルハウス"
-      odds = 5
+      odds = 15
     elsif pair == 3
       win = "スリーカード"
       odds = 3
@@ -173,7 +178,7 @@ module Poker
     @@data[username] = limit
     return point
   end
-  
+
   module_function :initial
   module_function :change
   module_function :deal
