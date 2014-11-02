@@ -112,12 +112,14 @@ module Poker
         else
           straight = 1
         end
+      elsif numlist.inject(0){|sum,i| sum+=i } == 15
+        straight = 1
       end
     end
     
     #フラッシュ？
     flash = 1 if suitetime.size == 1 #マークが一種類
-    
+    puts "pair"
     #ペア系判定
     min = numtime.min { |a,b| a[1] <=> b[1] }[1] #同じ数字が出た回数の最大最小
     max = numtime.max { |a,b| a[1] <=> b[1] }[1]
@@ -136,23 +138,26 @@ module Poker
       pair = 2 if i == 2  #ツーペア
       pair = 1 if i == 1  #ワンペア
     end
-    
+    puts "最終判定に入る" 
     #結果
-    if straight == 1 and flash == 1
+    if straight == 2 and flash == 1
+      win = "ロイヤルストレートフラッシュ"
+      odds = 1000
+    elsif straight == 1 and flash == 1
       win = "ストレートフラッシュ"
       odds = 100
-    elsif straight == 1
+    elsif straight == 1 or straight == 2
       win = "ストレート"
-      odds = 10
+      odds = 8
     elsif flash == 1
       win = "フラッシュ"
-      odds = 8
+      odds = 10
     elsif pair == 5
       win = "フォーカード"
-      odds = 7
+      odds = 50
     elsif pair == 4
       win = "フルハウス"
-      odds = 5
+      odds = 15
     elsif pair == 3
       win = "スリーカード"
       odds = 3
@@ -181,6 +186,3 @@ module Poker
 end
 
 Poker.initial
-#Poker.deal("Feru")
-#order=STDIN.gets
-#Poker.change("Feru",order)
