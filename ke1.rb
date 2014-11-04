@@ -11,6 +11,13 @@ require_relative 'timetable'
 require_relative 'battle'
 require_relative 'reflexes'
 
+class Integer
+  def jpy_comma
+    self.to_s.gsub(/(\d)(?=(\d{3})+(?!\d))/,'\1,')
+  end
+end
+
+
 NUMERON_LIMIT = 1800
 POKER_LIMIT = 600
 
@@ -26,8 +33,8 @@ eq.default = [0,0]
 while line = file.gets
   linearray = line.split(" ")
   ke[linearray[0]] = linearray[1].to_i
-  p line
 end
+
 file.close
 
 pool = Workers::Pool.new
@@ -41,7 +48,6 @@ ke.each do |name,count|
   i+=1
   puts "" if i%3==0
 end
-puts ""
 
 #$client.update("稼働を開始しました#{Time.now}")
 
@@ -60,7 +66,7 @@ puts ""
       if username == "_ke_bot_" or username == "_ke_bot__" #自分には20%で反応
         next if (rand 1..100) > 20
       end
-      $client.update("@#{username}さんの毛ポイントは #{ke[username]}毛 です。",:in_reply_to_status_id => id)
+      $client.update("@#{username}さんの毛ポイントは #{ke[username].jpy_comma}毛 です。",:in_reply_to_status_id => id)
       
     elsif contents =~ /毛ランキング|毛ランク/ # && username != "_ke_bot_"
       if username == "_ke_bot_" or username == "_ke_bot__" #自分には50%で反応
@@ -101,17 +107,17 @@ puts ""
       break if key == user
       }
       str = "@#{username}\n\n@#{user}の毛データ\n"
-      str +="#{ke[user]}毛 #{j}位/#{ke.size}人\n"
+      str +="#{ke[user].jpy_comma}毛 #{j}位/#{ke.size}人\n"
       str +="戦歴 #{$win[user]}勝#{$lose[user]}敗 勝率#{100*$win[user]/($win[user]+$lose[user])}%\n"
-      str +="バトルで獲得した毛 #{$battleplus[user]}毛\n"
-      str +="バトルで失った毛 #{$battleminus[user]}毛\n"
+      str +="バトルで獲得した毛 #{$battleplus[user].jpy_comma}毛\n"
+      str +="バトルで失った毛 #{$battleminus[user].jpy_comma}毛\n"
       str +=Reflexes.print_highscore(user)
       $client.update(str,:in_reply_to_status_id => id)
 
     elsif contents =~ /@.*おしつ毛/
       next if ke[username] > 0
       user = status.in_reply_to_screen_name
-      $client.update("@#{username} @#{user}に#{ke[username]}毛を押し付けました。",:in_reply_to_status_id => id)
+      $client.update("@#{username} @#{user}に#{ke[username].jpy_comma}毛を押し付けました。",:in_reply_to_status_id => id)
       ke[user] += ke[username]
       ke[username] = 0
 
@@ -190,9 +196,11 @@ puts ""
     end
 =end
     #ポーカー
-    if contents =~ /ポーカー.*\d+/
+    if contents =~ /マイナスポーカー.*\d+/
+      ke[username]+=Poker.deal(status,ke[username],-1)
+    elsif contents =~ /ポーカー.*\d+/
       puts "ポーカー開始"
-      ke[username]-=Poker.deal(status,ke[username])
+      ke[username] -= Poker.deal(status,ke[username],1)
     elsif contents =~ /@_ke_bot_.*[0-1]{5}/
       Poker.change(status)
       ke[username]+=Poker.judge(status)

@@ -26,6 +26,8 @@ end
 
 module Poker
   def initial
+    @@mark = Hash.new
+    @@mark.default = 0
     @@data = Hash.new
     @@data.default = 0
     @@card = Array.new
@@ -36,15 +38,18 @@ module Poker
     end
   end
   
-  def deal(status,ke)
+  def deal(status,ke,mark)
+    puts "le"
     username = status.user.screen_name
     bet = status.text.gsub(/\D/,"").to_i
-    
+    @@mark[username] = mark
+    ke *= mark
+
     #前回プレイ時からの時間
     if @@data[username].is_a?(Time)
       return 0 if @@data[username] > Time.now
     end
-    
+    p "a"
     if bet < 10
       $client.update("@#{username} 10毛以上BETしてください",:in_reply_to_status_id => status.id)
       return 0
@@ -62,6 +67,8 @@ module Poker
     hand.each do |i|
       card+=i.output+" "
     end
+   p "da"
+
     @@data[username] = Hash.new
     @@data[username]["hand"] = hand
     @@data[username]["talon"]= talon
@@ -172,9 +179,9 @@ module Poker
       odds = 0
     end
     puts "判定おわり"
-    point = @@data[username]["bet"]*odds
+    point = @@data[username]["bet"]*odds*@@mark[username]
     limit = Time.now + POKER_LIMIT
-    $client.update("@#{username} #{@@data[username]["result"]}\n結果：#{win}\n#{@@data[username]["bet"]}×#{odds}= #{point}毛 獲得しました！\n次回は#{limit.to_s[11..18]}よりプレイ可能",:in_reply_to_status_id => status.id)
+    $client.update("@#{username} #{@@data[username]["result"]}\n結果：#{win}\n#{(@@mark[username]*@@data[username]["bet"]).jpy_comma}×#{odds}= #{point.jpy_comma}毛 獲得しました！\n次回は#{limit.to_s[11..18]}よりプレイ可能",:in_reply_to_status_id => status.id)
     @@data[username] = limit
     return point
   end
